@@ -1,0 +1,316 @@
+[meta title:"Idyll" description:"Short description of your project" /]
+
+[Header
+  fullWidth:true
+  title:"Network Flow"
+  subtitle:"Introduction to Network Flow, Max-Flow/Min-Cut, and the Ford-Fulkerson Algorithm"
+  author:"Eshan Tarneja, Alex Alwan, and Michael Tamkin"
+  date:`(new Date()).toDateString()`
+  background:"#222222"
+  color:"#ffffff"
+   /]
+
+## Welcome!
+
+This post was written using a component-based library called Idyll.  It was created with the primary purpose of explaining network flow and the maximum flow algorithm.  As you explore, you will see various buttons and sliders to interact with.  You may use them to play animations and perform tasks on the page.  We hope that this is a helpful tool for learning. Enjoy!
+
+[br/]
+[br/]
+
+## Introduction
+
+Generally speaking, the maximum flow problem can be stated as:
+
+Given a set of nodes and edges comprising a network, an infinite input source, and a fixed maximum capacity for every edge, what is the maximum amount of flow that can pass through the network?
+
+The maximum flow of a network is defined as the maximum amount of flow that the network would allow to pass from start (source) to finish (sink). There are numerous existing algorithms that solve this particular problem; however, the one we wish to cover is the Ford-Fulkerson algorithm.
+
+#### Real World Applications
+
+There exist numerous applications of the maximum flow problem, some of which you may not have even considered!  Here are a few interesting applications:
+
+1. Baseball Playoff Elimination
+2. Airline scheduling
+3. Circulation-demand problem
+4. Fairness in car sharing (carpooling)
+
+You can learn more about these applications and how they apply to the maximum flow problem [link text:"here" url:"https://en.wikipedia.org/wiki/Maximum_flow_problem#Real_world_applications" /].
+
+[br/]
+
+## Understanding Network Graphs
+
+As mentioned previously, the key parts of network graphs are nodes, edges, and capacities.
+
+There are two key nodes to be aware of: the source(S) and the sink(T). The source is where the flow starts from in the network, and the sink is where in "drains out of". The other nodes in between are stops along the way.
+
+Although network graphs may have undirected edges, the graphs specific to flow networks only contain directed edges.  This means that flow can only move one direction through an edge.
+
+Additionally, each edge within the network has a fixed capacity. The amount of flow through an edge cannot exceed the capacity of the edge.
+
+Click through the buttons below to familiarize yourself with different components of network flow!
+
+[var name:"netState" value:0 /]
+
+[Graphic className:"d3-component-container"]
+  [networkGraph className:"d3-component" state:`netState` /]
+[/Graphic]
+
+[button className:"showVert" onClick:`netState = 1`] Vertices [/button]
+
+[button className:"showEdge" onClick:`netState = 2`] Edges [/button]
+
+[button className:"showCap" onClick:`netState = 3`] Capacities [/button]
+
+[button className:"showNet" onClick:`netState = 4`] Network Flow [/button]
+
+[br/]
+[br/]
+
+For those who are more mathematically inclined, you may think of a flow network as a tuple, [Equation] G = (V, E, s, t, c) [/Equation].  Essentially, it is comprised of a Digraph[Equation] (V,E) [/Equation] (a set of vertices and edges) with source, [Equation] s \in V [/Equation], and sink, [Equation] t \in V [/Equation]. Additionally, for each edge, [Equation] e \in E [/Equation], there exists a non-negative capacity [Equation] c_e [/Equation]. A flow through an edge is defined as [Equation] f_e [/Equation].
+
+[br/]
+
+## Maximum Flow Problem
+
+The maxiumum flow problem simply asks, given one of these flow networks with vertices, edges, and capacities - what is the maximum amount of flow that can be pushed through it?
+
+There are two main constraints that your "maximum flow" needs to follow to be considered a true maximum flow. Mathmatically speaking: An st-flow, [Equation] f [/Equation], is a function that satisfies the following contraints:
+
+* (Capacity) - For each [Equation] e \in E:  0 \leq f_e \leq c_e [/Equation]
+
+* (Flow conservation) - For each [Equation] v \in V - ({s,t}):  \Sigma f_e [/Equation]  (e out of v) [Equation] = \Sigma f_e  [/Equation] (e in to v)
+
+In other words, a maximum possible flow from S to T exists based on these two constraints:
+
+* Flow on an edge doesn’t exceed the given capacity of the edge.
+
+* Incoming flow is equal to outgoing flow for every vertex in the network, except for the source (S) and sink (T).
+
+The value of flow, [Equation] f [/Equation], is:
+
+* [Equation] val(f) [/Equation] = [Equation]  \Sigma f_e [/Equation]  (e out of v)  -  [Equation] \Sigma f_e  [/Equation] (e in to v)
+
+In the graph below you can see a few examples of what is and is not considered maximum flow.
+
+[var name:"maxFlowState" value:0 /]
+
+[Graphic className:"d3-component-container"]
+  [maxFlowGraph className:"d3-component" state:`maxFlowState` /]
+[/Graphic]
+
+[button className:"capEx" onClick:`maxFlowState = 1`] Capacity Exceeded[/button]
+
+[button className:"notMaxFlow" onClick:`maxFlowState = 2`] Sub-optimal Flow [/button]
+
+[button className:"maxFlow" onClick:`maxFlowState = 3`] Optimal Flow [/button]
+
+
+[br/]
+[br/]
+
+
+## Max-flow, Min-cut Theorem
+
+A quick way to find the maximum flow of a network is to use the "max-flow, min-cut" theorem. The theorem provides a method of finding the the tightest bottleneck in the network by examining all the possible bottlenecks one by one.
+
+To find these bottlnecks, the method takes all of the possible s-t cuts of the network, and compares their capacity.  So what is an s-t cut exactly?  An s-t cut is a partitioning of the vertices into two disjoint subsets; one subset will contain the source (S) and the other will contain the sink (T). One interesting way of envisioning this s-t cut is using set theory (A and B are the two disjoint subsets).
+
+* [Equation] A \cup B \in V [/Equation] (the union of A and B is the original network)
+
+* [Equation] A \cap B = \varnothing [/Equation] (the intersection of A and B is an empty set)
+
+The goal of this cut is to find the capacity of the edges that cross the partition made by the cut.  Again, the smallest capacity cut will dictate the maximum capacity flow that is feasible within the flow network. Explore the min cut method in the animation below!
+
+[var name:"minCutState" value:0 /]
+
+[Graphic className:"d3-component-container"]
+  [minCut className:"d3-component" state:`minCutState`/]
+[/Graphic]
+
+
+
+[button className:"simpleExample" onClick:`minCutState+=1`] Play Animation [/button]
+
+[br/]
+
+## Finding the Maximum Flow Path With a Greedy Approach
+
+Once you've found the maximum flow, the next step will be to identify the path of flow needed to achieve this final value.
+
+A simple way to first try and solve this problem is with a "greedy" approach.  Let us define what that would look like below:
+
+1. Start with [Equation] f_e = 0 [/Equation] for each edge [Equation] e \in E [/Equation].
+2. Find path P from source to sink, S ↝ T, where each edge has [Equation] f_e < c_e [/Equation].
+3. Augment flow along path P.
+4. Repeat until you get stuck.
+
+Lets see how this process would work below!
+
+[var name:"greedyGraphState" value:0 /]
+
+[Graphic className:"d3-component-container"]
+  [greedyGraph className:"d3-component" state:`greedyGraphState` /]
+[/Graphic]
+
+[button className:"simpleExample" onClick:`greedyGraphState += 1`] Play Animation [/button]
+
+[br/]
+[br/]
+
+Given the path that greedy returns, only 10 units of flow make it to the end, which is far below our goal of 15!
+
+While greedy is a simple method that will allow us to push flow through a network, in many cases like this a greedy solve is sub-optimal.
+
+Accordingly, there exists a better path that is able to push additional flow optimally through the network. To find this path, we need to find an approach that allows us to "back track", and remove flow in our current path so we can push it somewhere better.
+
+[br/]
+
+## Residual Network Flow
+
+To backtrack in the way we want, we need a map of not only where we can push flow forwards, but also where we can push flow backwards. This map will be the "residual network"
+
+For every flow network, G, that pushes flow from source to sink, there exists a residual network, R, that goes from sink to source. This residual network shares the same set of vertices as the original network, G.  Additionally, for each edge [Equation] e = (u,v) \in G [/Equation], there exists the following in the residual network, R:
+
+* A forward edge [Equation] e' = (u,v) [/Equation] with capacity [Equation] c_e - f_e [/Equation], if [Equation]  c_e - f_e  > 0[/Equation]
+
+* A backward edge [Equation] e'' = (v,u) [/Equation] with capacity [Equation] f_e [/Equation], if [Equation] f_e  > 0[/Equation]
+
+The forward edge of a residual graph has a value entitled the, "residual capacity," which is equal to the original capacity of the edge minus the current flow through it. Effectively, the residual capacity is the current capacity of the edge.
+
+The backwards edge of a residual graph holds that value of flow that is currently passing through the edge.  This value is updated in each step of the algorithm.
+
+You can think of the residual graph as showing you the amount of flow that can be pushed both forwards and backwards among an edge.
+
+Here is an example of how a single flow changes the capacity and residual capacity: the red numbers show the residual capacity while the blue numbers show the actual capacity and the amount of flow passing through the edge.
+
+[var name:"resGraphState" value:0 /]
+
+[Graphic className:"d3-component-container"]
+  [resGraph className:"d3-component" state:`resGraphState` /]
+[/Graphic]
+
+[button className:"simpleExample" onClick:`resGraphState += 1`] Play Animation [/button]
+
+[br/]
+[br/]
+
+
+## Ford-Fulkerson Algorithm
+
+The Ford-Fulkerson Algorithm uses the concept of residual graphs to move forwards and backwards towards a path of maximum flow! The algorithm was developed in 1956 by L. R. Ford, Jr. and D. R. Fulkerson and their method is widely used today!
+
+To find the maximum flow, the Ford-Fulkerson algorithm repeatedly searches for and finds augmenting paths using the residual network graph. This process repeats as flow is augmented through the network until no more augmenting paths are found in the network.
+
+An augmenting path is a path of edges in the residual graph with unused capacity greater than zero, [Equation] f_e < c_e [/Equation], from source (S) to sink (T).
+
+ A pseudocode for this algorithm is given below.  The inputs required are graph G, source node S, and sink node T.
+
+```
+function: FordFulkerson(Graph G, Node S, Node T):
+    Initialise flow in all edges to 0
+    while (there exists an augmenting path(P) between S and T in residual network graph):
+        Augment flow between S to T along the path P
+        Update residual network graph
+    return
+```
+In this implementation of the Ford-Fulkerson algorithm, the maximum flow will be reached when no more flow augmenting paths can be found in the graph.
+
+Here is an example of a complete run through of the algorithm, where you can see the maximum flow of 15 is reached!:
+
+[var name:"fordFulkState" value:0 /]
+
+[Graphic className:"d3-component-container"]
+  [residualGraph className:"d3-component" state:`fordFulkState` /]
+[/Graphic]
+
+[button className:"simpleExample" onClick:`fordFulkState +=1`] Play Animation [/button]
+
+### Time Complexity
+
+The time complexity for the above algorithm is [Equation] O(Ef) [/Equation], where E is the number of edges in the graph and f is the maximum flow of the graph. This is because each augmenting path can be found in [Equation] O(E) [/Equation] time and increases the flow by an integer amount of at least 1, with the upper bound, [Equation] f [/Equation].
+
+Note: this complexity only holds if the capacities of the graph are integers.
+
+A variation of the Ford–Fulkerson algorithm with guaranteed termination and a runtime independent of the maximum flow value is the Edmonds–Karp algorithm, which runs in   [Equation] O(VE^{2}) [/Equation] time.  You may read more about this implementation [link text:"here" url:"https://www.geeksforgeeks.org/ford-fulkerson-algorithm-for-maximum-flow-problem/" /].  However, the general idea is to use a breadth-first search (BFS) coupled with the Ford Fulkerson implementation.  BFS is key to this implementation, as it always picks a path with minimum number of edges.
+
+[br/]
+[br/]
+
+# Test your Knowledge
+
+## Question 1. Minimum Cut
+
+[var name:"myVar" value:"0" /]
+
+
+[var name:"textVal" value:"select" /]
+
+
+
+Use the Min Cut Method to calulate the Maximum Flow in the following network:  [Select value:textVal options:`["select","17", "18", "20", "23"]`  /]
+
+
+[Conditional if:`textVal=="select"`][/Conditional]
+[Conditional if:`textVal==17`] Correct![button  className:"helpButton" onClick:`myVar += 1`]Click For Walkthrough[/button][/Conditional]
+[Conditional if:`textVal==20`] Incorrect! Click to see answer or try again. [button  className:"helpButton" onClick:`myVar += 1`]Show Answer[/button][/Conditional]
+[Conditional if:`textVal==23`] Incorrect! Click to see answer or try again. [button  className:"helpButton" onClick:`myVar += 1`]Show Answer[/button][/Conditional]
+[Conditional if:`textVal==18`] Incorrect! Click to see answer or try again. [button  className:"helpButton" onClick:`myVar += 1`]Show Answer[/button][/Conditional]
+
+
+
+[Graphic className:"new-component-container"]
+    [NewD3Component className:"new-component" myVar:`myVar` /]
+[/Graphic]
+
+## Question 2. Ford Fulkerson
+
+Using the Ford Fulkerson Algorithm, calculate the flow through each edge needed to achieve maximum flow:
+
+[var name:"sa" value:0 /]
+[var name:"saMax" value:9 /]
+[var name:"sc" value:0 /]
+[var name:"scMax" value:9 /]
+[var name:"ab" value:0 /]
+[var name:"abMax" value:8 /]
+[var name:"ac" value:0 /]
+[var name:"acMax" value:10 /]
+[var name:"bt" value:0 /]
+[var name:"btMax" value:10 /]
+[var name:"cd" value:0 /]
+[var name:"cdMax" value:3 /]
+[var name:"cb" value:0 /]
+[var name:"cbMax" value:1 /]
+[var name:"db" value:0 /]
+[var name:"dbMax" value:8 /]
+[var name:"dt" value:0 /]
+[var name:"dtMax" value:7 /]
+
+
+
+S->A: [Range value:sa min:0 max:saMax /] [Display className:"rightMarg" value:sa /] S->C: [Range value:sc min:0 max:scMax /] [Display className:"rightMarg" value:sc /]
+
+A->B: [Range value:ab min:0 max:abMax /][Display className:"rightMarg" value:ab /] A->C: [Range value:ac min:0 max:acMax /] [Display value:ac /]
+
+B->T: [Range value:bt min:0 max:btMax /] [Display className:"rightMarg" value:bt /] C->D: [Range value:cd min:0 max:cdMax/] [Display value:cd /]
+
+C->B: [Range value:cb min:0 max:cbMax/] [Display className:"rightMarg" value:cb /] D->B: [Range value:db min:0 max:dbMax /] [Display value:db /]
+
+D->T: [Range value:dt min:0 max:dtMax /] [Display value:dt /]
+
+[var name:"yes" value:"Correct!" /]
+[var name:"no" value:"Incorrect! Click reset and try again, or click show answer for help." /]
+[var name:"submit" value:0 /]
+[var name:"show" value:0 /]
+
+[button  className:"helpButton" onClick:`submit += 1, show=0`]Submit[/button]
+[button  className:"helpButton" onClick:`sa = 0, sc = 0, ab = 0, ac = 0, bt = 0, cd =0, db=0, dt = 0, cb = 0,submit=0, show=0`] Reset [/button] [button  className:"helpButton" onClick:`show = 1, sa = 9, sc = 3, ab = 8, ac = 9, bt = 9, cd =3, db=0, dt = 3, cb = 1`]Show Answer[/button]
+
+[Conditional if: `submit>0`][Conditional if: `sa==9`][Conditional if: `sc==3`][Conditional if: `ab==8`][Conditional if: `ac==1`][Conditional if: `bt==9`][Conditional if: `cd==3`][Conditional if: `db==0`][Conditional if: `dt==3`][Conditional if: `cb==1`][Display value:yes /][/Conditional][/Conditional][/Conditional][/Conditional][/Conditional][/Conditional][/Conditional][/Conditional][/Conditional][/Conditional]
+
+[Conditional if: `submit>0`][Conditional if: `sa!=9` if: `sc!=3` if: `ab!=8` if: `ac!=9` if: `bt!=9` if: `cd!=3` if: `cb!=1` if: `db!=0` if: `dt!=3`][Display value:no /][/Conditional][/Conditional]
+
+
+[Graphic className:"new-component-container"]
+    [fordFulkTest sa:`sa` sc:`sc` ab:`ab` ac:`ac` bt:`bt` cd:`cd` db:`db` dt:`dt` dt:`dt` cb:`cb` saMax:`saMax` scMax:`scMax` abMax:`abMax` acMax:`acMax` btMax:`btMax` cdMax:`cdMax` dbMax:`dbMax` dtMax:`dtMax` cbMax:`cbMax` show:`show` /]
+[/Graphic]
